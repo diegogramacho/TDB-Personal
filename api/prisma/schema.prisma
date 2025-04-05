@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum recurrence {
+  Anualy
+  Monthly
+  Weekly
+  Daily
+}
+
+enum customRecurrence {
+  SEG
+  TER
+  QUA
+  QUI
+  SEX
+  SAB
+  DOM
+}
+
+enum financialCategory {
+  Alimentação
+  Transporte
+  Lazer
+  Saúde
+  Educação
+  Moradia
+  Outros
+}
+
+model User {
+  id                  String                @id @default(auto()) @map("_id") @db.ObjectId
+  email               String                @unique
+  name                String
+  password            String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  financial           FinancialAccount[]
+  tasks               Task[]
+  personalDevelopment personalDevelopment[]
+  ideas               idea[]
+  timelineEvents      TimelineEvent[]
+}
+
+model FinancialAccount {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  financialRegisters FinancialRegister[]
+}
+
+model FinancialRegister {
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  value            Float
+  type             String
+  description      String
+  category         financialCategory? // Referência à categoria financeira
+  recurrence       recurrence?
+  customRecurrence customRecurrence?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  financialAccountId String @db.ObjectId
+  financialAccount FinancialAccount @relation(fields: [financialAccountId], references: [id], onDelete: NoAction, onUpdate: NoAction) 
+}
+
+model Task {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  category    String?
+  reminder    DateTime?
+  status      Boolean   @default(false)
+  priority    Int       @default(1) // 1 = Baixa, 2 = Média, 3 = Alta
+  dueDate     DateTime? // Data limite de conclusão
+  parentId    String?   @db.ObjectId
+  parent      Task?     @relation("TaskHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subTasks    Task[]    @relation("TaskHierarchy")
+  recurrence       recurrence?
+  customRecurrence customRecurrence?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model personalDevelopment {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  category    String
+  reminder    DateTime
+  status      Boolean  @default(false)
+  progress    Float    @default(0) // Percentual de conclusão de 0 a 100
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model idea {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  status      Boolean @default(false)
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TimelineEvent {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  eventType   String // Tipo do evento: "Tarefa Concluída", "Meta Atingida", etc.
+  relatedId   String?  @db.ObjectId // ID relacionado (pode ser de uma Task, Financeiro, etc.)
+  createdAt   DateTime @default(now())
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id])
+}
