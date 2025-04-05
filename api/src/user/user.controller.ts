@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpStatus, Inject, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Inject, Param, ParseIntPipe, Patch, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Prisma, User as UserModel } from '@prisma/client'; 
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -41,7 +41,14 @@ export class UserController {
         return this.userService.deleteUser({id})
     }
        
+    @UseGuards(AuthGuard)
+    @Get('me')
+    async getMe(@Req() req: any): Promise<Omit<UserModel, 'password'> | null> {
+      const userId = req.user?.id;
+      if (!userId) throw new UnauthorizedException('User ID not found in token');
     
+      return this.userService.findUser({ id: userId });
+    }
 
 
 }

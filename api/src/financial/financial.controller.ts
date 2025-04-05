@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { FinancialService } from './financial.service';
 import { CreateFinancialDto } from './dto/create-financial.dto';
 import { UpdateFinancialDto } from './dto/update-financial.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('financial')
 export class FinancialController {
@@ -12,9 +13,11 @@ export class FinancialController {
     return this.financialService.create(createFinancialDto);
   }
 
+  @UseGuards(AuthGuard)
   @Get()
-  findAll() {
-    return this.financialService.findAll();
+  findAll(@Req() req: any) {
+    const userId = req.user.sub;
+    return this.financialService.findAll(userId);
   }
 
   @Get(':id')

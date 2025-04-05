@@ -38,24 +38,18 @@ export class PersonalDevelopmentService {
 
 
 
-  async update(id: string, updatePersonalDevelopmentDto: UpdatePersonalDevelopmentDto, userId: string) {
+  async update(id: string, updatePersonalDevelopmentDto: UpdatePersonalDevelopmentDto) {
     const result = await this.prisma.personalDevelopment.updateMany({
-      where: {id , userId}, data: updatePersonalDevelopmentDto})
-
-        if (result.count === 0) {
-          throw new NotFoundException('Personal development register not found or access denied!');
-        }
+      where: {id}, data: updatePersonalDevelopmentDto})
 
     return {message: 'Personal Development register updated successfully!'};
   }
 
-  async remove(id: string, userId: string) {
+  async remove(id: string) {
     const result = await this.prisma.personalDevelopment.deleteMany({
-      where: { id, userId }})
+      where: { id}})
 
-      if (result.count === 0) {
-        throw new NotFoundException('Personal development register not found or access denied!');
-      }
+      
       return {message: 'Personal Development register removed successfully!'}
   }
 }

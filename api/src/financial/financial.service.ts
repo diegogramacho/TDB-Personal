@@ -28,9 +28,9 @@ export class FinancialService {
 
   }
 
-  async update(id: string, updateFinancialDto: UpdateFinancialDto, userId: string) {
+  async update(id: string, updateFinancialDto: UpdateFinancialDto, ) {
     const result = await this.prisma.financialAccount.updateMany({
-      where: { id, userId }, data: updateFinancialDto });
+      where: { id }, data: updateFinancialDto });
 
     if (result.count === 0){
       throw new NotFoundException('Financial account not found or access denied.');
@@ -39,7 +39,7 @@ export class FinancialService {
     return result
   }
 
-  async remove(id: string, userId: string) {
+  async remove(id: string) {
     return this.prisma.financialAccount.delete({ where: { id } });
   }
 
@@ -50,8 +50,8 @@ export class FinancialService {
     });
   }
 
-  findAllRegisters(accountId: string) {
-    return this.prisma.financialRegister.findMany({ where: { accountId } });
+  findAllRegisters(financialAccountId: string) {
+    return this.prisma.financialRegister.findMany({ where: { financialAccountId } });
   }
 
   removeRegister(accountId: string, registerId: string) {
